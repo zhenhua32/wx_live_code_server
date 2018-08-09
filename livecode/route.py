@@ -1,8 +1,10 @@
 from aiohttp import web
 from .apis import hello
+from .apis import login
 
 routes_list = {
-    '/': hello.Hello
+    '/': hello.Hello,
+    '/login': login.Login
 }
 
 routes = []

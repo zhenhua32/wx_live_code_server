@@ -1,0 +1,13 @@
+{
+    "wx": {
+        "appid": "wx4b0b2f2c35a669a1",
+        "secret": "da94d05e331e29382c011a8c16482dd6",
+        "authorization_code_url": "https://api.weixin.qq.com/sns/jscode2session?appid={}&secret={}&js_code={}&grant_type=authorization_code",
+        "access_token_url": "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid={}&secret={}"
+    },
+    "mongdb": {
+        "host": "127.0.0.1",
+        "port": 27017
+    }
+}
+

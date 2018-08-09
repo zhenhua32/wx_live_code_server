@@ -5,11 +5,13 @@ import datetime
 """
 
 # 用户模型
-user_template = {
+users_template = {
     '_id': '',                      
     'open_id': '',                      
     'session_id': '',                      
-    'live_code_list': [],       # 活码列表, 保存的是 id               
+    'live_code_list': [],       # 活码列表, 保存的是 id 
+    'join_at': datetime.datetime.now(),
+    'last_visit': datetime.datetime.now(),              
 }
 
 # 活码模型
