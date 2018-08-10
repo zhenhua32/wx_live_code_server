@@ -22,6 +22,7 @@ def main(config_path=config_path):
     app.cleanup_ctx.append(init_resource)
 
 
+
     web.run_app(app)
 
 if __name__ == '__main__':

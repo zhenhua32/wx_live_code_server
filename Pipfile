@@ -7,8 +7,14 @@ name = "pypi"
 aiohttp = "*"
 motor = "*"
 qrcode = "*"
+schema = "*"
+pillow = "*"
 
 [dev-packages]
+yapf = "*"
+pytest = "*"
+pytest-aiohttp = "*"
+rope = "*"
 
 [requires]
 python_version = "3.6"

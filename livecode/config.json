@@ -5,7 +5,7 @@
         "authorization_code_url": "https://api.weixin.qq.com/sns/jscode2session?appid={}&secret={}&js_code={}&grant_type=authorization_code",
         "access_token_url": "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid={}&secret={}"
     },
-    "mongdb": {
+    "mongodb": {
         "host": "127.0.0.1",
         "port": 27017
     }

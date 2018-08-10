@@ -1,5 +1,6 @@
 from aiohttp import web
 from aiohttp.web import middleware
+from multidict import MultiDict
 
 def is_need_verify(url, rule=None, skip=None):
     """
@@ -67,7 +68,10 @@ async def parse_content(request, handler):
             body = await request.post()
         request['body'] = body
     elif request.method == 'GET':
-        request['body'] = request.query
+        match_info = request.match_info
+        query = request.query
+        request['body'] = MultiDict(**match_info, **query)
+
 
     resp = await handler(request)
     return resp

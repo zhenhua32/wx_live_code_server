@@ -16,6 +16,7 @@ def get_empty_user():
 
 class Login(web.View):
     async def post(self):
+        """用户登录注册"""
         users = self.request.app['db'].users
 
         code = self.request['body'].get('code', None)
@@ -23,7 +24,7 @@ class Login(web.View):
             return web.json_response({
                 'errcode': 1,
                 'msg': '没有 code 参数'
-            })
+            }, status=400)
 
         appid = self.request.app['config']['wx']['appid']
         secret = self.request.app['config']['wx']['secret']

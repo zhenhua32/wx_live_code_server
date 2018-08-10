@@ -16,14 +16,17 @@ users_template = {
 
 # 活码模型
 live_code_template = {
-    '_id': '',                        #       
+    '_id': '',                        #                    # 用户的第几个 live code
+    'open_id': '',                    # 识别用户 
     'title': '',                      # 标题        
     'date': datetime.datetime.now(),  # 创建日期                            
     'src': '',                        # 活码的地址, https 地址      
     'img_count': 0,                   #            
     'max_scan': 100,                  # 扫描的阈值, 每当达到阈值的时候会换下一张二维码            
     'all_scan': 0,                    # 总的扫描次数
-    'img': [],                        # 二维码, 保存的是 id                           
+    'img': {
+        'name': 0             # key 是用户上传图片的_id, value 是扫描次数
+    },                                               
 
 }
 
@@ -35,7 +38,7 @@ live_code_img_template = {
     'chunkSize': '',
     'metadata': {
         'open_id': '',          # 连接到 user
-        'live_code_id': '',     # 连接到 live_code   
+        'live_code_id': '',     # 连接到 live_code
     }
 
 }
