@@ -1,5 +1,3 @@
-import json
-import os
 import pytest
 import qrcode
 from io import BytesIO

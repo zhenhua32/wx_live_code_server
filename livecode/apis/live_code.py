@@ -4,7 +4,7 @@ from io import BytesIO
 from aiohttp import web
 from bson import ObjectId
 import qrcode
-from ..lib.utils import get_file_url
+from ..tools.utils import get_file_url
 from ..validate import s_UserLiveCode_post, s_LiveCodeRedirect_get
 
 

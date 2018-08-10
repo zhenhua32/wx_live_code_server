@@ -2,12 +2,13 @@ from aiohttp import web
 from .apis import hello
 from .apis import login
 from .apis import live_code
+from .apis import user_img
 
 routes_list = {
     '/': hello.Hello,
-    # '/to/{id}': live_code.LiveCodeRedirect,
     '/wx/login': login.Login,
-    '/wx/user/live_code': live_code.UserLiveCode
+    '/wx/user/live_code': live_code.UserLiveCode,
+    '/wx/user/img', user_img.UserImg
 }
 
 routes = []

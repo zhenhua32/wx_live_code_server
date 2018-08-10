@@ -61,9 +61,10 @@ async def parse_content(request, handler):
     """
     为 GET 和 POST 方法添加 request['body']
     """
-    if request.method == 'POST':
+    if request.method in ['POST', 'PUT', 'DELETE', 'PATCH']:
         if 'json' in request.content_type:
             body = await request.json()
+            body = MultiDict(**body)
         else:
             body = await request.post()
         request['body'] = body
