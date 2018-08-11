@@ -25,7 +25,10 @@ live_code_template = {
     'max_scan': 100,                  # 扫描的阈值, 每当达到阈值的时候会换下一张二维码            
     'all_scan': 0,                    # 总的扫描次数
     'img': {
-        'name': 0             # key 是用户上传图片的_id, value 是扫描次数
+        'name': {                     # name 是图片在 user_img 中的 id
+            'scan': 0,
+            'date': date,             # 上传日期 
+        }
     },                                               
 
 }

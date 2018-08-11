@@ -20,6 +20,6 @@ s_UserImg_post = Schema({
 
 s_UserImg_delete = Schema({
     'live_code_id': And(str, len, Use(ObjectId), error='无效的 live_code_id'),
-    'img_ids': And([str, len, Use(ObjectId)], error='无效的 img id')
+    'img_ids': [And(str, len, Use(ObjectId), error='无效的 img_id' )]
 })
 

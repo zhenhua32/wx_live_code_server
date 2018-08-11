@@ -8,7 +8,7 @@ routes_list = {
     '/': hello.Hello,
     '/wx/login': login.Login,
     '/wx/user/live_code': live_code.UserLiveCode,
-    '/wx/user/img', user_img.UserImg
+    '/wx/user/img': user_img.UserImg
 }
 
 routes = []

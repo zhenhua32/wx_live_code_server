@@ -4,7 +4,7 @@ from io import BytesIO
 from aiohttp import web
 from bson import ObjectId
 import qrcode
-from ..tools.utils import get_file_url
+from ..tools.utils import get_file_url, get_str_date
 from ..validate import s_UserLiveCode_post, s_LiveCodeRedirect_get
 
 
@@ -41,8 +41,6 @@ class LiveCodeRedirect(web.View):
                 return web.HTTPFound(img_url)
         
         return web.json_response({'errcode': 1, 'msg': '没有可以跳转的图片'}, status=404)
-        
-
 
 
 class UserLiveCode(web.View):
@@ -50,20 +48,36 @@ class UserLiveCode(web.View):
     用户相关的 live_code 操作
     """
     async def get(self):
-        """获取用户的所有 live_code"""
+        """获取用户的所有 live_code 或单个"""
         users = self.request.app['db'].users
         collection_live_code = self.request.app['db'].live_code
         open_id = self.request['open_id']
 
-        user = await users.find_one({'open_id': open_id})
+        live_code_id = self.request['body'].get('id', None)
 
-        live_code_ids = [ObjectId(x) for x in user['live_code_list']]
-        items = collection_live_code.find({'_id': {'$in': live_code_ids}}, {'_id': 0})
+        if live_code_id:
+            item = await collection_live_code.find_one({'_id': ObjectId(live_code_id), 'open_id': open_id}, {'_id': 0})
+            if not item:
+                return web.json_response({'errcode': 0, 'msg': 'live_code 不存在或没有权限'}, status=400)
+            items = [item]
+        else:
+            # 获取用户的所有 live_code
+            user = await users.find_one({'open_id': open_id})
+
+            live_code_ids = [ObjectId(x) for x in user['live_code_list']]
+            aitems = collection_live_code.find({'_id': {'$in': live_code_ids}}, {'_id': 0})
+            items = []
+            async for item in aitems:
+                items.append(item)
 
         results = []
-        async for item in items:
+        for item in items:
             item['date'] = item['date'].strftime('%Y-%m-%d %H:%M:%S')
-            item['img'] = [get_file_url(self.request.app, 'user_img', param={'filename': x}) for x in item['img'].keys()]
+            new_img = {}
+            for k, v in item['img'].items():
+                key = get_file_url(self.request.app, 'user_img', param={'filename': k})
+                new_img[key] = v
+            item['img'] = new_img
             results.append(item)
 
         data = {'result': results}
@@ -104,7 +118,7 @@ class UserLiveCode(web.View):
         }
 
         # 创建活码
-        file_name = base64.urlsafe_b64encode(f'{open_id}_{live_code_id}.png'.encode('utf-8')).decode('utf-8')
+        file_name = base64.urlsafe_b64encode(f'{open_id}_{live_code_id}'.encode('utf-8')).decode('utf-8')+'.png'
         file_src = await self.create_qrcode(file_name, open_id, live_code_id)
 
         # 更新活码 ,更新用户的活码列表
@@ -119,6 +133,7 @@ class UserLiveCode(web.View):
 
         # 这里的 url 是一个会重定向的网址
         url = get_file_url(self.request.app, 'live_code_redirect', {'id': live_code_id})
+        url = self.request.app['config']['host'] + url
         qr = qrcode.QRCode(
             version=10,
             error_correction=qrcode.constants.ERROR_CORRECT_M,

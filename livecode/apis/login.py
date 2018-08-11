@@ -33,11 +33,11 @@ class Login(web.View):
 
         async with client_session.get(url) as resp:
             if resp.status != 200:
-                return web.json_response({'errcode': 1, 'msg': '微信验证失败'})
+                return web.json_response({'errcode': 1, 'msg': '微信验证失败'}, status=400)
             
             body = json.loads(await resp.text())
             if 'errcode' in body:
-                return web.json_response({'errcode': 1, 'msg': body})
+                return web.json_response({'errcode': 1, 'msg': body}, status=400)
             
             return await self.login(body)
 
