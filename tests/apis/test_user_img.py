@@ -101,7 +101,7 @@ class TestUserImg:
         assert resp.status == 200
         body = await resp.json()
         assert body['errcode'] == 0
-        assert len(body['data']['src']) == 1
+        assert len(body['data']['img']) == 1
 
         item = fs_user_img.find({'metadata.open_id': user['session_id']})
         assert len(list(item)) == 1
@@ -122,7 +122,7 @@ class TestUserImg:
         assert resp.status == 200
         body = await resp.json()
         assert body['errcode'] == 0
-        assert len(body['data']['src']) == 2
+        assert len(body['data']['img']) == 2
 
         item = fs_user_img.find({'metadata.open_id': user['session_id']})
         assert len(list(item)) == 2
