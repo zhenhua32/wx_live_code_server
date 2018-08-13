@@ -20,8 +20,7 @@ live_code_template = {
     'open_id': '',                    # 识别用户 
     'title': '',                      # 标题        
     'date': datetime.datetime.now(),  # 创建日期                            
-    'src': '',                        # 活码的地址, https 地址      
-    'img_count': 0,                   #            
+    'src': '',                        # 活码的地址, https 地址            
     'max_scan': 100,                  # 扫描的阈值, 每当达到阈值的时候会换下一张二维码            
     'all_scan': 0,                    # 总的扫描次数
     'img': {

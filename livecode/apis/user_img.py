@@ -2,12 +2,12 @@ import datetime
 from aiohttp import web
 from bson import ObjectId
 from ..validate import s_UserImg_post, s_UserImg_delete
-from ..tools.decorator import check_live_code
+from ..tools.decorator import CheckLiveCode
 from ..tools.utils import get_file_url, get_str_date
 
 
 class UserImg(web.View):
-    @check_live_code
+    @CheckLiveCode()
     async def post(self):
         """为活码上传图片"""
         open_id = self.request['open_id']
@@ -25,6 +25,7 @@ class UserImg(web.View):
         except Exception as e:
             return web.json_response({'errcode': 1, 'msg': str(e)}, status=400)
 
+        # 保存图片, 和返回的信息
         update_img = {}
         img_data = []
         for item in img:
@@ -45,6 +46,7 @@ class UserImg(web.View):
                 'date': now
             }
             img_data.append({
+                'id': file_id,
                 'src': get_file_url(self.request.app, 'user_img', param={'filename': file_id}),
                 'scan': 0,
                 'date': get_str_date(now)
@@ -54,7 +56,7 @@ class UserImg(web.View):
 
         return web.json_response({'errcode': 0, 'data': {'img': img_data}})
 
-    @check_live_code
+    @CheckLiveCode()
     async def delete(self):
         """删除活码下的图片"""
         open_id = self.request['open_id']

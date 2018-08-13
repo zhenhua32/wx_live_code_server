@@ -45,6 +45,49 @@ def user():
 
 
 @pytest.fixture(scope='function')
+def user_delete():
+    one = get_empty_user()
+    one['open_id'] = 'test_live_code_delete'
+    live_code_list = []
+
+    one_lc = db.live_code.insert_one({'hello': 0, 'open_id': one['open_id']})
+    live_code_list.append(str(one_lc.inserted_id))
+    one_lc = db.live_code.insert_one({'hello': 1, 'open_id': one['open_id']})
+    live_code_list.append(str(one_lc.inserted_id))
+
+    one['live_code_list'] = live_code_list
+    db.users.insert_one(one)
+    yield {
+        'session_id': one['open_id'],
+        'live_code_ids': live_code_list
+    }
+    client.drop_database(db)
+
+
+@pytest.fixture(scope='function')
+def user_patch():
+    one = get_empty_user()
+    one['open_id'] = 'test_live_code_delete'
+    live_code_list = []
+
+    one_lc = db.live_code.insert_one({
+        'hello': 0, 
+        'open_id': one['open_id'],
+        'title': 'hello',
+        'max_scan': 100
+    })
+    live_code_list.append(str(one_lc.inserted_id))
+
+    one['live_code_list'] = live_code_list
+    db.users.insert_one(one)
+    yield {
+        'session_id': one['open_id'],
+        'live_code_ids': live_code_list
+    }
+    client.drop_database(db)
+
+
+@pytest.fixture(scope='function')
 def add_img():
     buffered = BytesIO()
     img = qrcode.make('hello')
@@ -56,7 +99,9 @@ def add_img():
         'max_scan': 100,
         'all_scan': 0,
         'img': {
-            str(img_id): 0
+            str(img_id): {
+                'scan': 0
+            }
         }
     })
 
@@ -77,7 +122,9 @@ def add_img_max():
         'max_scan': 100,
         'all_scan': 0,
         'img': {
-            str(img_id): 100
+            str(img_id): {
+                'scan': 100
+            }
         }
     })
 
@@ -146,6 +193,98 @@ class TestUserLiveCode:
         resp = await cli.post('/wx/user/live_code', json=data, headers=user)
         assert resp.status == 400
 
+    async def test_case_5(self, cli, user_delete):
+        # 测试删除单个 live_code
+        data = {'ids': user_delete['live_code_ids'][:1]}
+        headers = {'session_id': user_delete['session_id']}
+        resp = await cli.delete('/wx/user/live_code', json=data, headers=headers)
+        assert resp.status == 200
+        body = await resp.json()
+        assert body['errcode'] == 0
+
+        assert db.live_code.count_documents({}) == 1
+        user = db.users.find_one({'open_id': user_delete['session_id']})
+        assert len(user['live_code_list']) == 1
+    
+    async def test_case_6(self, cli, user_delete):
+        # 测试删除多个 live_code
+        data = {'ids': user_delete['live_code_ids']}
+        headers = {'session_id': user_delete['session_id']}
+        resp = await cli.delete('/wx/user/live_code', json=data, headers=headers)
+        assert resp.status == 200
+        body = await resp.json()
+        assert body['errcode'] == 0
+
+        assert db.live_code.count_documents({}) == 0
+        user = db.users.find_one({'open_id': user_delete['session_id']})
+        assert len(user['live_code_list']) == 0
+
+    async def test_case_7(self, cli, user_delete):
+        # 测试删除 live_code 时的用户权限, 用户不拥有某个 live_code_id
+        data = {'ids': user_delete['live_code_ids'] + [str(ObjectId())]}
+        headers = {'session_id': user_delete['session_id']}
+        resp = await cli.delete('/wx/user/live_code', json=data, headers=headers)
+        assert resp.status == 401
+        body = await resp.json()
+        assert body['errcode'] == 1
+        assert body['msg'] == '没有权限'
+
+        data = {'ids': user_delete['live_code_ids'] + ['hello']}
+        resp = await cli.delete('/wx/user/live_code', json=data, headers=headers)
+        assert resp.status == 400
+
+    async def test_case_8(self, cli, user_patch):
+        # 测试更新 live_code
+        data = {
+            'id': user_patch['live_code_ids'][0],
+            'title': 'new hello',
+            'max': '80'
+        }
+        headers = {'session_id': user_patch['session_id']}
+        resp = await cli.patch('/wx/user/live_code', json=data, headers=headers)
+        assert resp.status == 200
+        body = await resp.json()
+        assert body['errcode'] == 0
+
+        one_live_code = db.live_code.find_one({'_id': ObjectId(user_patch['live_code_ids'][0])})
+        assert one_live_code['title'] == 'new hello'
+        assert one_live_code['max_scan'] == 80
+    
+    async def test_case_9(self, cli, user_patch):
+        # 测试更新 live_code 的一部分
+        data = {
+            'id': user_patch['live_code_ids'][0],
+            'title': 'new hello',
+            'max': '80'
+        }
+        headers = {'session_id': user_patch['session_id']}
+        resp = await cli.patch('/wx/user/live_code', json=data, headers=headers)
+        assert resp.status == 200
+
+        data = {
+            'id': user_patch['live_code_ids'][0],
+            'title': 'new hello',
+        }
+        resp = await cli.patch('/wx/user/live_code', json=data, headers=headers)
+        assert resp.status == 200
+
+        data = {
+            'id': user_patch['live_code_ids'][0],
+            'max': '80'
+        }
+        resp = await cli.patch('/wx/user/live_code', json=data, headers=headers)
+        assert resp.status == 200
+
+    async def test_case_10(self, cli, user_patch):
+        # 测试更新 live_code 时的权限
+        data = {
+            'id': str(ObjectId()),
+            'title': 'new title'
+        }
+        headers = {'session_id': user_patch['session_id']}
+        resp = await cli.patch('/wx/user/live_code', json=data, headers=headers)
+        assert resp.status == 401
+
 
 class TestLiveCodeRedirect:
     async def test_case_1(self, cli):
@@ -160,15 +299,17 @@ class TestLiveCodeRedirect:
         assert resp.status == 404
     
     async def test_case_2(self, cli, add_img):
+        # 测试图片跳转
         resp = await cli.get('/to/'+add_img['id'])
         assert resp.status == 200
         assert resp.headers.get('Content-Type', '') == 'image/png'
 
         item = db.live_code.find_one({'_id': ObjectId(add_img['id'])})
         assert item['all_scan'] == 1
-        assert list(item['img'].values())[0] == 1
+        assert list(item['img'].values())[0]['scan'] == 1
     
     async def test_case_3(self, cli, add_img_max):
+        # 测试图片跳转, 所有的图片的跳转次数都满了, 无法跳转
         resp = await cli.get('/to/'+add_img_max['id'])
         assert resp.status == 404
         body = await resp.json()

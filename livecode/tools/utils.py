@@ -1,3 +1,8 @@
+import datetime
+import json
+from aiohttp import web
+from aiohttp.helpers import sentinel
+
 
 
 def get_file_url(app, route_name, param:dict):
@@ -32,3 +37,24 @@ def get_file_urls(app, name, param:dict):
 
 def get_str_date(date):
     return date.strftime('%Y-%m-%d %H:%M:%S')
+
+
+def default(obj):
+    if isinstance(obj, datetime.datetime):
+        return get_str_date(obj)
+
+
+# 稍微改写了 web.json_response, 支持 datetime
+def json_response(data=sentinel, *, text=None, body=None, status=200,
+                  reason=None, headers=None, content_type='application/json'):
+    if data is not sentinel:
+        if text or body:
+            raise ValueError(
+                "only one of data, text, or body should be specified"
+            )
+        else:
+            text = json.dumps(data, default=default)
+    return web.Response(text=text, body=body, status=status, reason=reason,
+                    headers=headers, content_type=content_type)
+
+
