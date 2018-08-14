@@ -160,9 +160,9 @@ class TestUserLiveCode:
         assert len(body['data']['result']) == 0
 
     async def test_case_3(self, cli, user):
-        # 测试 post UserLiveCode
+        # 测试 put UserLiveCode
         data = {'title': 'title 1', 'max': 100}
-        resp = await cli.post('/wx/user/live_code', json=data, headers=user)
+        resp = await cli.put('/wx/user/live_code', json=data, headers=user)
         assert resp.status == 200
         body = await resp.json()
         assert body['errcode'] == 0
@@ -180,17 +180,17 @@ class TestUserLiveCode:
         assert len(body['data']['result']) == 1
 
     async def test_case_4(self, cli, user):
-        # 测试 post UserLiveCode 的参数不正确的情况
+        # 测试 put UserLiveCode 的参数不正确的情况
         data = {}
-        resp = await cli.post('/wx/user/live_code', json=data, headers=user)
+        resp = await cli.put('/wx/user/live_code', json=data, headers=user)
         assert resp.status == 400
         
         data = {'title': 'hello'}
-        resp = await cli.post('/wx/user/live_code', json=data, headers=user)
+        resp = await cli.put('/wx/user/live_code', json=data, headers=user)
         assert resp.status == 400
 
         data = {'title': 'hello', 'max': 5}
-        resp = await cli.post('/wx/user/live_code', json=data, headers=user)
+        resp = await cli.put('/wx/user/live_code', json=data, headers=user)
         assert resp.status == 400
 
     async def test_case_5(self, cli, user_delete):
@@ -241,7 +241,7 @@ class TestUserLiveCode:
             'max': '80'
         }
         headers = {'session_id': user_patch['session_id']}
-        resp = await cli.patch('/wx/user/live_code', json=data, headers=headers)
+        resp = await cli.post('/wx/user/live_code', json=data, headers=headers)
         assert resp.status == 200
         body = await resp.json()
         assert body['errcode'] == 0
@@ -258,21 +258,21 @@ class TestUserLiveCode:
             'max': '80'
         }
         headers = {'session_id': user_patch['session_id']}
-        resp = await cli.patch('/wx/user/live_code', json=data, headers=headers)
+        resp = await cli.post('/wx/user/live_code', json=data, headers=headers)
         assert resp.status == 200
 
         data = {
             'id': user_patch['live_code_ids'][0],
             'title': 'new hello',
         }
-        resp = await cli.patch('/wx/user/live_code', json=data, headers=headers)
+        resp = await cli.post('/wx/user/live_code', json=data, headers=headers)
         assert resp.status == 200
 
         data = {
             'id': user_patch['live_code_ids'][0],
             'max': '80'
         }
-        resp = await cli.patch('/wx/user/live_code', json=data, headers=headers)
+        resp = await cli.post('/wx/user/live_code', json=data, headers=headers)
         assert resp.status == 200
 
     async def test_case_10(self, cli, user_patch):
@@ -282,7 +282,7 @@ class TestUserLiveCode:
             'title': 'new title'
         }
         headers = {'session_id': user_patch['session_id']}
-        resp = await cli.patch('/wx/user/live_code', json=data, headers=headers)
+        resp = await cli.post('/wx/user/live_code', json=data, headers=headers)
         assert resp.status == 401
 
 

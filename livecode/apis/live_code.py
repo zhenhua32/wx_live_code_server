@@ -83,8 +83,8 @@ class UserLiveCode(web.View):
 
         return json_response({'errcode': 0, 'data': data})
 
-    async def post(self):
-        """增加一个 live_code, 应该使用 put 方法, 但小程序只支持 post  """
+    async def put(self):
+        """增加一个 live_code  """
         users = self.request.app['db'].users
         collection_live_code = self.request.app['db'].live_code
         open_id = self.request['open_id']
@@ -149,14 +149,18 @@ class UserLiveCode(web.View):
         return web.json_response({'errcode': 0})
 
     @CheckLiveCode(live_code_filed='id')
-    async def patch(self):
-        """更新单个 live_code, 不包括 img 部分 """
+    async def post(self):
+        """
+        更新单个 live_code, 不包括 img 部分
+        又白写了, 小程序不支持 patch
+        """
         users = self.request.app['db'].users
         collection_live_code = self.request.app['db'].live_code
         open_id = self.request['open_id']
 
         live_code_id = self.request['body'].get('id', None)
 
+        # 更新 max_scan 的时候不做其他处理, 例如 img 的更新
         update_info = {
             'title': self.request['body'].get('title', None),
             'max_scan': self.request['body'].get('max', None)
