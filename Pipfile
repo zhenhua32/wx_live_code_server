@@ -8,7 +8,7 @@ aiohttp = "*"
 motor = "*"
 qrcode = "*"
 schema = "*"
-pillow = "*"
+Pillow = ">=6.2.2"
 
 [dev-packages]
 yapf = "*"
